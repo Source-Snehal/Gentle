@@ -22,22 +22,15 @@ export function useCompleteStep() {
     },
     
     onSuccess: (data, { taskId }) => {
-      // Navigate to celebrate page with context about whether task is complete
-      const searchParams = new URLSearchParams()
-      if (taskId) {
-        searchParams.set('taskId', taskId)
-      }
-      if (data?.taskCompleted) {
-        searchParams.set('taskCompleted', 'true')
-      }
-      
-      console.log('useCompleteStep - data:', data, 'taskId:', taskId, 'URL params:', searchParams.toString())
-      
-      router.push(`/celebrate?${searchParams.toString()}`)
-      
-      // Invalidate related queries
+      // Invalidate related queries to refresh the task view
       queryClient.invalidateQueries({ queryKey: ['steps'] })
       queryClient.invalidateQueries({ queryKey: ['tasks'] })
+      
+      // If task is completed, go to task list, otherwise stay on current task page
+      if (data?.taskCompleted) {
+        router.push('/tasks')
+      }
+      // If task is not completed, we stay on the current page which will update to show the next step
     },
     
     onError: (error, stepId, context) => {

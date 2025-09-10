@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { motion } from 'framer-motion'
+import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -26,12 +26,27 @@ export default function TaskDetailPage() {
   const completeStep = useCompleteStep()
   const tooBigStep = useTooBigStep()
   const [subStepsMap, setSubStepsMap] = useState<Record<string, SubStep[]>>({})
+  const [completedStepId, setCompletedStepId] = useState<string | null>(null)
+  const [showCelebration, setShowCelebration] = useState(false)
   
   const prefersReducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
   const handleCompleteStep = (stepId: string) => {
+    setCompletedStepId(stepId)
+    setShowCelebration(true)
     completeStep.mutate({ stepId, taskId })
   }
+
+  // Hide celebration after step completion
+  useEffect(() => {
+    if (completeStep.isSuccess && showCelebration) {
+      const timer = setTimeout(() => {
+        setShowCelebration(false)
+        setCompletedStepId(null)
+      }, 2000)
+      return () => clearTimeout(timer)
+    }
+  }, [completeStep.isSuccess, showCelebration])
 
   const handleTooBigStep = (stepId: string) => {
     tooBigStep.mutate(stepId, {
@@ -101,7 +116,36 @@ export default function TaskDetailPage() {
   const progress = totalSteps > 0 ? (doneSteps / totalSteps) * 100 : 0
 
   return (
-    <motion.div {...motionProps} className="space-y-8">
+    <>
+      {/* Celebration Overlay */}
+      <AnimatePresence>
+        {showCelebration && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center"
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white dark:bg-gentle-800 rounded-3xl p-8 shadow-2xl text-center space-y-4"
+            >
+              <motion.div
+                animate={{ scale: [1, 1.2, 1] }}
+                transition={{ duration: 0.6, repeat: Infinity }}
+                className="text-6xl"
+              >
+                🎉
+              </motion.div>
+              <h2 className="text-2xl font-medium">Step completed!</h2>
+              <p className="text-gentle-600">Moving to next step...</p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <motion.div {...motionProps} className="space-y-8">
       {/* Header */}
       <div className="space-y-6">
         <Link href="/tasks">
@@ -155,6 +199,10 @@ export default function TaskDetailPage() {
               const isCompleting = completeStep.isPending
               const isBreakingDown = tooBigStep.isPending
               const isLoading = isCompleting || isBreakingDown
+              
+              // Find the next pending step to highlight
+              const nextPendingStep = task.steps.find(s => s.state === 'pending')
+              const isNextStep = step.id === nextPendingStep?.id
 
               return (
                 <motion.div
@@ -167,6 +215,8 @@ export default function TaskDetailPage() {
                 >
                   <Card className={`p-6 bg-white/50 dark:bg-gentle-800/50 backdrop-blur border-gentle-200 dark:border-gentle-700 ${
                     step.state === 'done' ? 'opacity-75' : ''
+                  } ${
+                    isNextStep ? 'ring-2 ring-gentle-400 border-gentle-400 bg-gentle-50/80 dark:bg-gentle-700/80' : ''
                   }`}>
                     <div className="space-y-4">
                       <div className="flex items-start gap-3">
@@ -253,5 +303,6 @@ export default function TaskDetailPage() {
         <p>You're doing great—keep going at your own pace</p>
       </div>
     </motion.div>
+    </>
   )
 }

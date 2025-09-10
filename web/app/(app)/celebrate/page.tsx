@@ -3,7 +3,7 @@
 import { useEffect, useState, Suspense } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Sparkles, Heart, ArrowRight, X, Trophy, Star, Zap, Crown, Gift } from 'lucide-react'
@@ -75,12 +75,14 @@ const getRandomCelebration = () => {
 
 function CelebratePageContent() {
   const { user } = useAuthSession()
+  const router = useRouter()
   const searchParams = useSearchParams()
   const taskId = searchParams.get('taskId')
   const { data: task, isLoading: isTaskLoading } = useTask(taskId || '')
   const [showCelebrationBanner, setShowCelebrationBanner] = useState(false)
   const [celebrationMessage, setCelebrationMessage] = useState('')
   const [currentCelebration] = useState(() => getRandomCelebration())
+  const [countdown, setCountdown] = useState(3)
   
   const prefersReducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
@@ -100,6 +102,26 @@ function CelebratePageContent() {
 
     return unsubscribe
   }, [user?.id])
+
+  // Auto-redirect after celebration with countdown
+  useEffect(() => {
+    const taskCompleted = searchParams.get('taskCompleted') === 'true'
+    const nextStepUrl = taskCompleted ? '/tasks' : (taskId ? `/tasks/${taskId}` : '/tasks')
+    
+    // Countdown timer
+    const countdownInterval = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(countdownInterval)
+          router.push(nextStepUrl)
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
+
+    return () => clearInterval(countdownInterval)
+  }, [searchParams, taskId, router])
 
   const motionProps = prefersReducedMotion ? {} : {
     initial: { opacity: 0, scale: 0.9 },
@@ -277,7 +299,10 @@ function CelebratePageContent() {
               disabled={isTaskLoading && !!taskId}
               className={`w-full h-14 text-lg font-medium rounded-2xl bg-gradient-to-r ${currentCelebration.color} text-white shadow-lg hover:shadow-xl transition-all duration-200 group disabled:opacity-50 hover:scale-105`}
             >
-              {taskCompleted ? 'View all tasks' : 'Continue with next step'}
+              {countdown > 0 ? 
+                `${taskCompleted ? 'View all tasks' : 'Continue with next step'} (${countdown})` :
+                (taskCompleted ? 'View all tasks' : 'Continue with next step')
+              }
               <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform duration-200" />
             </Button>
           </Link>
