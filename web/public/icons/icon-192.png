@@ -1,0 +1,6 @@
+# NOTE: placeholder image content
+# This would be a 192x192 PNG icon for the PWA
+# Generate using: a simple heart or circle icon in gentle blue/gray colors
+# Tool suggestion: Create a simple SVG heart icon and export as PNG at 192x192
+# Colors: Use the gentle theme colors from tailwind config (gentle-500: hsl(215 16% 47%))
+# Background: Rounded square with gentle-100 background and centered heart icon in gentle-600

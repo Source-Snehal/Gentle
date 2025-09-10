@@ -1,0 +1,153 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: radial-gradient(ellipse at top, hsl(210 100% 97%) 0%, hsl(185 85% 92%) 25%, hsl(155 70% 88%) 75%, hsl(135 50% 85%) 100%);
+    --foreground: 125 90% 15%;
+    --card: linear-gradient(135deg, hsla(210 100% 98% / 0.8) 0%, hsla(195 100% 96% / 0.6) 100%);
+    --card-foreground: 125 80% 20%;
+    --popover: 200 100% 98%;
+    --popover-foreground: 125 80% 20%;
+    --primary: 155 50% 50%;
+    --primary-foreground: 210 100% 99%;
+    --secondary: 185 85% 90%;
+    --secondary-foreground: 135 70% 30%;
+    --muted: 195 100% 95%;
+    --muted-foreground: 145 60% 40%;
+    --accent: 175 70% 80%;
+    --accent-foreground: 135 70% 30%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 100% 99%;
+    --border: 185 85% 90%;
+    --input: 195 100% 95%;
+    --ring: 155 50% 50%;
+    --radius: 1.5rem;
+  }
+
+  .dark {
+    --background: radial-gradient(ellipse at bottom, hsl(125 80% 15%) 0%, hsl(155 100% 8%) 25%, hsl(135 70% 12%) 75%, hsl(115 50% 18%) 100%);
+    --foreground: 200 100% 98%;
+    --card: linear-gradient(135deg, hsla(135 70% 20% / 0.8) 0%, hsla(125 80% 15% / 0.6) 100%);
+    --card-foreground: 195 100% 95%;
+    --popover: 125 80% 20%;
+    --popover-foreground: 195 100% 95%;
+    --primary: 175 70% 80%;
+    --primary-foreground: 125 80% 20%;
+    --secondary: 135 70% 25%;
+    --secondary-foreground: 195 100% 95%;
+    --muted: 135 70% 25%;
+    --muted-foreground: 175 70% 70%;
+    --accent: 145 60% 35%;
+    --accent-foreground: 195 100% 95%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 195 100% 95%;
+    --border: 135 70% 25%;
+    --input: 135 70% 25%;
+    --ring: 175 70% 80%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply text-foreground font-sans overflow-x-hidden;
+    background: var(--background);
+    min-height: 100vh;
+  }
+  
+  /* Modern glassmorphism utilities */
+  .glass {
+    @apply backdrop-blur-xl bg-white/10 dark:bg-black/10;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  }
+  
+  .glass-strong {
+    @apply backdrop-blur-2xl bg-white/20 dark:bg-black/20;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.5);
+  }
+  
+  /* Modern floating animations */
+  @keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-20px) rotate(180deg); }
+  }
+  
+  @keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
+    50% { box-shadow: 0 0 40px rgba(59, 130, 246, 0.6), 0 0 60px rgba(59, 130, 246, 0.3); }
+  }
+  
+  @keyframes shimmer {
+    0% { background-position: -200% center; }
+    100% { background-position: 200% center; }
+  }
+  
+  .animate-float { animation: float 6s ease-in-out infinite; }
+  .animate-pulse-glow { animation: pulse-glow 3s ease-in-out infinite; }
+  .animate-shimmer {
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+  }
+  
+  /* Modern scroll bars */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, hsl(var(--gentle-400)), hsl(var(--ocean-400)));
+    border-radius: 10px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, hsl(var(--gentle-500)), hsl(var(--ocean-500)));
+    background-clip: content-box;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Gentle focus styles */
+*:focus-visible {
+  @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+}
+
+/* Large touch targets for mobile */
+@media (pointer: coarse) {
+  button,
+  [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
